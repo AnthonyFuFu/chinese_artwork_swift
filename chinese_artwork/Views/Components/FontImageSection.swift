@@ -3,7 +3,7 @@
 //  chinese_artwork
 //
 //  詳細區下方的「各種字體」區塊:
-//  上方 3×3 書體選擇按鈕;選定某書體後,下方才顯示該書體分類的圖片。
+//  上方書體選擇按鈕(響應式格線,寬螢幕排更多);選定某書體後,下方才顯示該書體分類的圖片。
 //  目前圖片來自 PlaceholderFontImageService 的假圖。
 //
 
@@ -17,8 +17,10 @@ struct FontImageSection: View {
 
     @State private var selectedStyleId: Int?
 
-    private let buttonColumns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 3)
-    private let imageColumns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 2)
+    // 響應式格線:以手機版寬度為基準的最小格寬,寬螢幕(Mac/iPad)自動排更多欄、圖不變大。
+    // 手機 ≈ 3 欄按鈕、2 欄圖片;Mac 寬窗則同一水平線排更多。
+    private let buttonColumns = [GridItem(.adaptive(minimum: 92), spacing: 8)]
+    private let imageColumns = [GridItem(.adaptive(minimum: 110, maximum: 150), spacing: 8)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -26,7 +28,7 @@ struct FontImageSection: View {
                 .font(.headline)
                 .foregroundStyle(.secondary)
 
-            // 3×3 書體選擇按鈕
+            // 書體選擇按鈕(響應式:手機約 3 欄,寬螢幕更多)
             LazyVGrid(columns: buttonColumns, spacing: 8) {
                 ForEach(service.styles()) { style in
                     styleButton(style)
