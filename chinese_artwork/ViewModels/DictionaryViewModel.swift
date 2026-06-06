@@ -50,6 +50,11 @@ final class DictionaryViewModel {
     /// 被點選收集的字體圖片(僅記憶體,不持久化;切換部首/搜尋不清除)。
     private(set) var collectedImages: [CollectedImage] = []
 
+    /// 目前作用中分頁對應的字。
+    var activeEntry: DictionaryEntry? {
+        selectedEntries.first { $0.id == activeEntryId }
+    }
+
     // MARK: - 私有資料
 
     private var allEntries: [DictionaryEntry] = []

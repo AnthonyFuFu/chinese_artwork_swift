@@ -245,7 +245,9 @@ struct DictionaryListView: View {
                 .padding(.horizontal, 12)
             }
 
-            // 內容卡:可左右滑動的分頁
+            // 內容卡
+            #if os(iOS)
+            // iOS:可左右滑動的分頁(.page 會隱藏系統分頁列)
             TabView(selection: $viewModel.activeEntryId) {
                 ForEach(viewModel.selectedEntries) { entry in
                     ScrollView {
@@ -261,6 +263,21 @@ struct DictionaryListView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
             .background(Color.secondaryBackground)
+            #else
+            // macOS:沒有 .page 樣式,直接顯示作用中那頁(用上方書籤切換)
+            ScrollView {
+                if let entry = viewModel.activeEntry {
+                    DictionaryDetailContent(
+                        entry: entry,
+                        showsHeader: false,
+                        onPickImage: { viewModel.collectImage($0) }
+                    )
+                    .padding()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.secondaryBackground)
+            #endif
         }
     }
 
