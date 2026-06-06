@@ -15,6 +15,8 @@ struct DictionaryDetailContent: View {
     var showsHeader: Bool = true
     /// 大字標頭的字級。
     var headerFontSize: CGFloat = 120
+    /// 點字體圖片時的回呼(收集到右側面板)。
+    var onPickImage: (CollectedImage) -> Void = { _ in }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -49,7 +51,7 @@ struct DictionaryDetailContent: View {
             .background(Color.secondaryBackground, in: RoundedRectangle(cornerRadius: 16))
 
             // 各種字體圖片(目前為 API 假圖)
-            FontImageSection(character: entry.word)
+            FontImageSection(character: entry.word, onPickImage: onPickImage)
                 .id(entry.word)
         }
     }

@@ -19,19 +19,34 @@ struct DictionaryListView: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            VStack(spacing: 0) {
-                topBar
-                Divider()
+            GeometryReader { geo in
+                HStack(spacing: 0) {
+                    // 主要區(查字 + 詳細)
+                    VStack(spacing: 0) {
+                        topBar
+                        Divider()
 
-                switch viewModel.loadState {
-                case .idle, .loading:
-                    ProgressView("載入字典中…")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                case .failed(let message):
-                    errorView(message)
-                case .loaded:
-                    content
+                        switch viewModel.loadState {
+                        case .idle, .loading:
+                            ProgressView("載入字典中…")
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        case .failed(let message):
+                            errorView(message)
+                        case .loaded:
+                            content
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+
+                    // 右側收集面板(約 1/5 寬):有收集到圖片才顯示,清空後收起
+                    if !viewModel.collectedImages.isEmpty {
+                        Divider()
+                        collectionPanel
+                            .frame(width: geo.size.width * 0.2)
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                    }
                 }
+                .animation(.easeInOut(duration: 0.25), value: viewModel.collectedImages.isEmpty)
             }
 
             if isDrawerOpen {
@@ -234,8 +249,12 @@ struct DictionaryListView: View {
             TabView(selection: $viewModel.activeEntryId) {
                 ForEach(viewModel.selectedEntries) { entry in
                     ScrollView {
-                        DictionaryDetailContent(entry: entry, showsHeader: false)
-                            .padding()
+                        DictionaryDetailContent(
+                            entry: entry,
+                            showsHeader: false,
+                            onPickImage: { viewModel.collectImage($0) }
+                        )
+                        .padding()
                     }
                     .tag(Optional(entry.id))
                 }
@@ -303,6 +322,77 @@ struct DictionaryListView: View {
                 Label("選擇部首", systemImage: "line.3.horizontal")
             }
             .buttonStyle(.borderedProminent)
+        }
+    }
+
+    // MARK: - 右側收集面板
+
+    private var collectionPanel: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Image(systemName: "tray.full")
+                    .font(.caption)
+                Text("收集")
+                    .font(.caption.weight(.semibold))
+            }
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 8)
+
+            ScrollView {
+                VStack(spacing: 8) {
+                    ForEach(viewModel.collectedImages) { image in
+                        collectedThumb(image)
+                    }
+                }
+                .padding(.horizontal, 6)
+                .padding(.bottom, 8)
+            }
+
+            Button {
+                viewModel.clearCollected()
+            } label: {
+                Label("清空", systemImage: "trash")
+                    .font(.caption2)
+            }
+            .padding(.bottom, 8)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.secondaryBackground)
+    }
+
+    private func collectedThumb(_ image: CollectedImage) -> some View {
+        VStack(spacing: 2) {
+            AsyncImage(url: image.url) { phase in
+                switch phase {
+                case .success(let img):
+                    img.resizable().scaledToFill()
+                case .empty:
+                    ProgressView()
+                default:
+                    Image(systemName: "photo").foregroundStyle(.tertiary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(1, contentMode: .fit)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    viewModel.removeCollected(image)
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.white, .black.opacity(0.5))
+                }
+                .buttonStyle(.plain)
+                .padding(3)
+            }
+
+            Text("\(image.character)·\(image.styleName)")
+                .font(.system(size: 9))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
     }
 

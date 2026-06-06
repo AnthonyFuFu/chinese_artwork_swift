@@ -47,6 +47,9 @@ final class DictionaryViewModel {
     /// 目前作用中的分頁(對應 selectedEntries 中某字的 id)。
     var activeEntryId: Int? = nil
 
+    /// 被點選收集的字體圖片(僅記憶體,不持久化;切換部首/搜尋不清除)。
+    private(set) var collectedImages: [CollectedImage] = []
+
     // MARK: - 私有資料
 
     private var allEntries: [DictionaryEntry] = []
@@ -232,6 +235,25 @@ final class DictionaryViewModel {
     private func resetDetail() {
         selectedEntries = []
         activeEntryId = nil
+    }
+
+    // MARK: - 圖片收集(僅記憶體)
+
+    /// 收集一張圖(已收集則略過,避免重複)。
+    func collectImage(_ image: CollectedImage) {
+        if !collectedImages.contains(image) {
+            collectedImages.append(image)
+        }
+    }
+
+    /// 從收集面板移除某張圖。
+    func removeCollected(_ image: CollectedImage) {
+        collectedImages.removeAll { $0 == image }
+    }
+
+    /// 清空收集面板。
+    func clearCollected() {
+        collectedImages.removeAll()
     }
 }
 

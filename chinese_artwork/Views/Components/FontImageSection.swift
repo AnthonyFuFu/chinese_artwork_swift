@@ -12,6 +12,8 @@ import SwiftUI
 struct FontImageSection: View {
     let character: String
     var service: FontImageService = PlaceholderFontImageService()
+    /// 點某張圖時的回呼(用於收集到右側面板)。
+    var onPickImage: (CollectedImage) -> Void = { _ in }
 
     @State private var selectedStyleId: Int?
 
@@ -75,9 +77,18 @@ struct FontImageSection: View {
 
             LazyVGrid(columns: imageColumns, spacing: 8) {
                 ForEach(urls, id: \.self) { url in
-                    fontImage(url)
+                    Button {
+                        onPickImage(CollectedImage(character: character, styleName: styleName, url: url))
+                    } label: {
+                        fontImage(url)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
+
+            Text("點圖片可加入右側收集")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         } else {
             Text("選擇上方書體以顯示圖片")
                 .font(.footnote)
