@@ -71,26 +71,39 @@ private struct RadicalStrokeSection: View {
     @State private var isExpanded: Bool = false
 
     var body: some View {
-        DisclosureGroup(isExpanded: $isExpanded) {
-            LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(group.radicals) { radical in
-                    RadicalChip(
-                        word: radical.word,
-                        isSelected: radical.id == selectedRadicalId
-                    ) {
-                        onSelect(radical.id)
+        VStack(spacing: 0) {
+            // 整列皆可點(跨平台:不依賴 DisclosureGroup 在 macOS 只能點箭頭的行為)
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+            } label: {
+                HStack {
+                    Text("\(group.strokeCount) 畫")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text("\(group.radicals.count)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if isExpanded {
+                LazyVGrid(columns: columns, spacing: 8) {
+                    ForEach(group.radicals) { radical in
+                        RadicalChip(
+                            word: radical.word,
+                            isSelected: radical.id == selectedRadicalId
+                        ) {
+                            onSelect(radical.id)
+                        }
                     }
                 }
-            }
-            .padding(.vertical, 8)
-        } label: {
-            HStack {
-                Text("\(group.strokeCount) 畫")
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Text("\(group.radicals.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                .padding(.vertical, 8)
             }
         }
         .padding(.horizontal)
