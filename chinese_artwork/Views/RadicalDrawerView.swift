@@ -15,11 +15,32 @@ struct RadicalDrawerView: View {
     /// 預設展開的部首筆畫數(讓使用者一打開就看到內容)。
     let initiallyExpandedStroke: Int?
     let onSelect: (Int) -> Void
+    /// 點「公告」時呼叫。
+    var onShowAnnouncements: () -> Void = {}
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 5)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // 公告選項
+            Button(action: onShowAnnouncements) {
+                HStack(spacing: 10) {
+                    Image(systemName: "megaphone")
+                    Text("公告")
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 14)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Divider()
+
             // 標題
             HStack(spacing: 8) {
                 Image(systemName: "character.book.closed")

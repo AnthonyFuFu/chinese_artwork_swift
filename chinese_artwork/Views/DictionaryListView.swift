@@ -13,6 +13,7 @@ import SwiftUI
 struct DictionaryListView: View {
     @State private var viewModel = DictionaryViewModel()
     @State private var isDrawerOpen = false
+    @State private var showAnnouncements = false
 
     private let drawerWidth: CGFloat = 300
     private let gridColumns = [GridItem(.adaptive(minimum: 52), spacing: 8)]
@@ -62,6 +63,10 @@ struct DictionaryListView: View {
                     onSelect: { id in
                         viewModel.selectRadical(id)
                         closeDrawer()
+                    },
+                    onShowAnnouncements: {
+                        closeDrawer()
+                        showAnnouncements = true
                     }
                 )
                 .frame(width: drawerWidth)
@@ -71,6 +76,9 @@ struct DictionaryListView: View {
         }
         .animation(.easeInOut(duration: 0.25), value: isDrawerOpen)
         .onAppear { viewModel.load() }
+        .sheet(isPresented: $showAnnouncements) {
+            AnnouncementView()
+        }
     }
 
     // MARK: - 最上方一列:hamburger + 查詢格
